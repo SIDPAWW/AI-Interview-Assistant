@@ -1,73 +1,96 @@
-# Welcome to your Lovable project
+# AI-Interview Assistant 
 
 ## Project info
 
 **URL**: https://lovable.dev/projects/46cd7afd-b3fb-42fb-a36c-a776c38ac039
 
-## How can I edit this code?
+````markdown
+# AI Interview Assistant
 
-There are several ways of editing your application.
+AI Interview Assistant is a small web application that helps run AI-powered technical interviews. It can:
 
-**Use Lovable**
+- Generate role-focused interview questions (the project currently targets full-stack / React + Node.js questions).
+- Present an interview flow for a candidate (resume upload -> info collection -> live Q&A).
+- Evaluate candidate answers using an AI evaluator and produce a final summary and score.
+- Provide an interviewer dashboard to review completed interviews and candidate scores.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/46cd7afd-b3fb-42fb-a36c-a776c38ac039) and start prompting.
+This project is built with Vite, React, and TypeScript and uses Tailwind CSS + shadcn-ui for the UI.
 
-Changes made via Lovable will be committed automatically to this repo.
+## Quick start (local development)
 
-**Use your preferred IDE**
+Prerequisites:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Node.js 18+ and npm (or yarn/pnpm).
+- An OpenAI API key (the app calls the OpenAI API from the client; for production you should proxy requests through a server to keep the key secret).
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Clone the repository and install dependencies:
 
-Follow these steps:
+```powershell
+git clone https://github.com/SIDPAWW/AI-Interview-Assistant
+cd AI-Interview-Assistant
+npm install
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+2. Create a .env file in the project root with your OpenAI key:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```text
+# .env
+VITE_OPENAI_API_KEY=sk-...your-openai-key-here...
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3. Start the dev server:
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```powershell
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open http://localhost:5173 in your browser (Vite default port). If Vite chooses a different port it will show in the terminal.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Available scripts
 
-**Use GitHub Codespaces**
+- npm run dev — Start dev server (Vite)
+- npm run build — Build production bundle
+- npm run build:dev — Build with development mode
+- npm run preview — Preview the production build locally
+- npm run lint — Run ESLint
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Environment variables
 
-## What technologies are used for this project?
+- VITE_OPENAI_API_KEY — required for generating questions and evaluating answers. If this is missing the app will throw an error when trying to call the OpenAI API.
 
-This project is built with:
+Important: Do not commit secrets. For production, host a small serverless function or API proxy that forwards requests to OpenAI and keeps your key out of client bundles.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## What the app does (implementation notes)
 
-## How can I deploy this project?
+- Question generation: implemented in `src/utils/aiService.ts` (function `generateInterviewQuestions`). It calls OpenAI to produce a JSON array of questions.
+- Answer evaluation: `evaluateAnswer` sends a prompt to OpenAI and expects a numeric score (0–100).
+- Final summary: `generateFinalSummary` creates a short summary from answered questions.
+- Interview flow: `src/pages/IntervieweePage.tsx` drives the candidate flow (resume upload → info collection → interview chat).
+- Interviewer dashboard: `src/pages/InterviewerPage.tsx` lists candidates, scores, and details.
 
-Simply open [Lovable](https://lovable.dev/projects/46cd7afd-b3fb-42fb-a36c-a776c38ac039) and click on Share -> Publish.
+Data is stored client-side in Redux (`src/redux`) and persisted with `redux-persist` so sessions survive a browser refresh.
 
-## Can I connect a custom domain to my Lovable project?
+## Project structure (important files)
 
-Yes, you can!
+- src/pages — top-level pages (Index, IntervieweePage, InterviewerPage)
+- src/components — UI components used by pages (ResumeUpload, InterviewChat, Interviewer UI kit)
+- src/redux — Redux store and slices (candidate state and persistence)
+- src/utils/aiService.ts — OpenAI integration helpers (generate/evaluate/summary)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Deployment
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Build the app and deploy the static output to any static hosting provider (Vercel, Netlify, GitHub Pages). Example build steps:
+
+```powershell
+npm run build
+npm run preview    # quick local check of the production build
+```
+
+Notes:
+
+- Because the app calls OpenAI from the browser, your API key may be exposed in production builds. Move OpenAI calls to a server endpoint (serverless functions on Vercel/Netlify) and call that endpoint from the client.
+- Configure environment variables on your hosting provider (Vercel/Netlify) rather than committing them to the repo.
+
+
+
+````
